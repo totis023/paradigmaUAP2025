@@ -15,3 +15,8 @@ biblioteca.retirarLibro(38932, "1234");
 console.log(biblioteca.consultarEstadoLibro("1234"));
 
 console.log(biblioteca.consultarEstadoSocio(38932));
+console.log( biblioteca.reservarLibro(38933, "1234") );
+console.log( biblioteca.reservarLibro(38934, "1234") ); 
+
+biblioteca.devolverLibro(38932, "1234"); 
+console.log(biblioteca.consultarEstadoLibro("1234"));

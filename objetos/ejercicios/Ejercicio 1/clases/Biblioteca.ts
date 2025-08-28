@@ -61,6 +61,19 @@ class Biblioteca {
     }
 
     socio.devolver(libro);
+
+    const cola = this.obtenerCola(libro.isbn);
+  const siguienteId = cola.shift(); // saca al primero
+  if (siguienteId !== undefined) {
+    const siguienteSocio = this.buscarSocio(siguienteId);
+    if (siguienteSocio) {
+      // Notificamos
+      siguienteSocio.notificarReserva(libro);
+      // (Opcional) Prestar automáticamente
+      siguienteSocio.retirar(libro, this.DURACION);
+      console.log(`El libro "${libro.titulo}" fue asignado a ${siguienteSocio.nombreCompleto} por reserva.`);
+    }
+  }
   }
 
   consultarEstadoLibro(isbn: string): string {
@@ -97,6 +110,36 @@ class Biblioteca {
 
     return `Préstamos de ${socio.nombreCompleto}:\n${listado}`;
   }
+  private reservas: Map<string, number[]> = new Map(); // isbn -> cola de ids de socio
+
+  private obtenerCola(isbn: string): number[] {
+    if (!this.reservas.has(isbn)) this.reservas.set(isbn, []);
+    return this.reservas.get(isbn)!;
+  }
+  private estaPrestado(libro: Libro): boolean {
+    return this.socios.some(s => s.tienePrestadoLibro(libro));
+  }
+  public reservarLibro(socioId: number, libroISBN: string): string {
+  const socio = this.buscarSocio(socioId);
+  const libro = this.buscarLibro(libroISBN);
+  if (!socio || !libro) {
+    throw new Error("No se encontró el socio o el libro.");
+  }
+
+  if (!this.estaPrestado(libro)) {
+    return `El libro "${libro.titulo}" está disponible; podés retirarlo sin reservar.`;
+  }
+
+  const cola = this.obtenerCola(libro.isbn);
+  if (cola.includes(socioId)) {
+    return `${socio.nombreCompleto} ya tiene una reserva para "${libro.titulo}".`;
+  }
+
+  cola.push(socioId);
+  return `${socio.nombreCompleto} reservó "${libro.titulo}". Posición en la cola: ${cola.length}.`;
+}
+
+
 }
 
 export const biblioteca = new Biblioteca();

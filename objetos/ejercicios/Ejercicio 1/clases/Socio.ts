@@ -13,7 +13,7 @@ export class Socio {
   constructor(
     private _id: number,
     private _nombre: string,
-    private _apellido: string
+    private _apellido: string,
   ) {}
 
   get id() {
@@ -59,4 +59,10 @@ export class Socio {
   getPrestamos(): Prestamo[] {
     return [...this.prestamos];
   }
+
+  public notificarReserva(libro: Libro) : void {
+   console.log(`Hola ${this.nombreCompleto}, el libro "${libro.titulo}" que reservaste ya está disponible.`);
+  }
+  
+  
 }
