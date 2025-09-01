@@ -114,7 +114,7 @@ for (const personaje of personajes) {
 const ganador = juego.combate(guerrero, mago);
 ```
 
-## Parte 3: Cambio de esquema
+## Parte 4: Cambio de esquema
 
 Se introducen 3 tipos de objetos: Pergamino de guerrero, pergamino de mago y pergamino de arquero.
 Cuando un personaje usa estos objetos en el medio de un combate, cambia su tipo de personaje al nuevo seleccionado.
