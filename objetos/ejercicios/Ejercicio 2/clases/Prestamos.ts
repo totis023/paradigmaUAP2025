@@ -1,4 +1,4 @@
-import { Prestamo } from "./prestamo";
+import { Prestamo } from "./Prestamo";
 
 /**
  * PrestamoRegular: dura 14 días, multa estándar (10).
