@@ -43,7 +43,8 @@ en lugar de usar Maybe. Trabajamos con List de Elm.
 
 miMap : (a -> b) -> List a -> List b
 miMap fx lista =
-    []
+    if isEmpty lista then []
+    else fx (head lista) :: miMap fx (tail lista)
 
 
 
@@ -53,7 +54,10 @@ miMap fx lista =
 
 miFiltro : (a -> Bool) -> List a -> List a
 miFiltro predicado lista =
-    []
+    if isEmpty lista then []
+    else let h = head lista in 
+    if (predicado h) then h :: (miFiltro predicado (tail lista))
+    else miFiltro predicado (tail lista)
 
 
 
@@ -63,7 +67,13 @@ miFiltro predicado lista =
 
 miFoldl : (a -> b -> b) -> b -> List a -> b
 miFoldl fx acumulador lista =
-    acumulador
+    if isEmpty lista then acumulador
+    else let nuevoAcumulador = (fx (head lista) acumulador)
+    in
+    miFoldl fx nuevoAcumulador (tail lista)
+
+--miFoldl (\numero state = state ++ (String.fromInt numero)) "" [1,2,3] 
+--miFoldl (\numero state = state + num) 0 [1,2,3] -- 6
 
 
 
@@ -78,7 +88,7 @@ miFoldl fx acumulador lista =
 
 duplicar : List Int -> List Int
 duplicar lista =
-    []
+    miMap (\x -> x * 2) lista
 
 
 
@@ -143,7 +153,7 @@ pares lista =
 
 positivos : List Int -> List Int
 positivos lista =
-    []
+    miFiltro (\x = x > 0) lista
 
 
 
@@ -208,7 +218,7 @@ producto lista =
 
 contarFold : List a -> Int
 contarFold lista =
-    0
+    miFoldl (\el acum = acum + 1) 0 lista
 
 
 
@@ -248,8 +258,7 @@ invertirFold lista =
 
 todos : (a -> Bool) -> List a -> Bool
 todos predicado lista =
-    False
-
+    miFoldl (\elem acum = acum && (predicado elem)) True lista
 
 
 -- 21. Alguno Verdadero
