@@ -42,36 +42,45 @@ Creá los siguientes árboles usando la definición anterior:
 ```elm
 -- Un árbol vacío
 arbolVacio : Tree Int
+arbolVacio = Empty
 
 -- Un árbol con un solo nodo (hoja)
 arbolHoja : Tree Int
+arbolHoja = Node 5 Empty Empty
 -- Ejemplo:     5
 
 -- Un árbol pequeño
 arbolPequeno : Tree Int
--- Ejemplo:
---      3
---     / \
---    1   5
+arbolPequeno =
+    Node 3
+        (Node 1 Empty Empty)
+        (Node 5 Empty Empty)
 
 -- Un árbol mediano
 arbolMediano : Tree Int
--- Ejemplo:
---        10
---       /  \
---      5    15
---     / \   / \
---    3  7 12  20
-```
-
+arbolMediano =
+    (Node 10
+        (Node 3 Empty Empty)
+        (Node 7 Empty Empty)
+    )
+    (Node 15
+        (Node 12 Empty Empty)
+        (Node 20 Empty Empty)
+    )
+ ```   
 **2. Es Vacío**
 
 Escribí una función que determine si un árbol está vacío.
 
 ```elm
 esVacio : Tree a -> Bool
--- Ejemplo: esVacio Empty == True
--- Ejemplo: esVacio (Node 5 Empty Empty) == False
+esVacio arbol =
+    case arbol of 
+        Empty ->
+            True
+
+        Node _ _ _ ->
+            False
 ```
 
 **3. Es Hoja**
@@ -80,8 +89,13 @@ Escribí una función que determine si un árbol es una hoja (nodo sin hijos).
 
 ```elm
 esHoja : Tree a -> Bool
--- Ejemplo: esHoja (Node 5 Empty Empty) == True
--- Ejemplo: esHoja (Node 5 (Node 3 Empty Empty) Empty) == False
+esHoja arbol =
+    case arbol of
+        Node _ Empty Empty ->
+            True
+
+        _->
+            False
 ```
 
 ---
@@ -98,9 +112,15 @@ Contá cuántos nodos tiene un árbol.
 
 ```elm
 tamaño : Tree a -> Int
--- Ejemplo: tamaño Empty == 0
--- Ejemplo: tamaño (Node 5 Empty Empty) == 1
--- Ejemplo: tamaño arbolPequeno == 3
+tamaño arbol =
+    case arbol of
+        Empty ->
+            0
+
+        Node _ izquierda derecha ->
+            1 + tamaño izquierda + tamaño derecha
+
+
 ```
 
 **5. Altura del Árbol**
@@ -109,11 +129,13 @@ Calculá la altura de un árbol (la distancia del nodo raíz a la hoja más leja
 
 ```elm
 altura : Tree a -> Int
--- Un árbol vacío tiene altura 0
--- Una hoja tiene altura 1
--- Ejemplo: altura Empty == 0
--- Ejemplo: altura (Node 5 Empty Empty) == 1
--- Ejemplo: altura arbolPequeno == 2
+altura arbol =
+    case arbol of
+        Empty ->
+            0
+
+        Node _ izquierda derecha ->
+            1 + max (altura izquierda) (altura derecha)
 ```
 
 **6. Suma de Valores**
@@ -122,8 +144,13 @@ Sumá todos los valores de un árbol de enteros.
 
 ```elm
 sumarArbol : Tree Int -> Int
--- Ejemplo: sumarArbol Empty == 0
--- Ejemplo: sumarArbol (Node 5 (Node 3 Empty Empty) (Node 7 Empty Empty)) == 15
+sumarArbol arbol =
+    case arbol of
+        Empty ->
+            0
+
+        Node valor izquierda derecha ->
+            valor + sumarArbol izquierda + sumarArbol derecha
 ```
 
 **7. Contiene Valor**
@@ -132,8 +159,16 @@ Verificá si un valor existe en el árbol.
 
 ```elm
 contiene : a -> Tree a -> Bool
--- Ejemplo: contiene 5 arbolPequeno == True
--- Ejemplo: contiene 10 arbolPequeno == False
+contiene valor arbol =
+    case arbol of
+        Empty ->
+            False
+
+        Node x izquierda derecha ->
+            if x == valor then
+                True
+            else
+                contiene valor izquierda || contiene valor derecha
 ```
 
 **8. Contar Hojas**
@@ -142,9 +177,16 @@ Contá cuántas hojas tiene un árbol.
 
 ```elm
 contarHojas : Tree a -> Int
--- Ejemplo: contarHojas Empty == 0
--- Ejemplo: contarHojas (Node 5 Empty Empty) == 1
--- Ejemplo: contarHojas arbolPequeno == 2
+contarHojas arbol =
+    case arbol of
+        Empty ->
+            0
+
+        Node _ Empty Empty ->
+            1
+
+        Node _ izquierda derecha ->
+            contarHojas izquierda + contarHojas derecha
 ```
 
 **9. Valor Mínimo (sin Maybe)**
@@ -153,8 +195,21 @@ Encontrá el valor mínimo en un árbol. Si el árbol está vacío, devolvé 0.
 
 ```elm
 minimo : Tree Int -> Int
--- Ejemplo: minimo Empty == 0
--- Ejemplo: minimo arbolPequeno == 1
+minimo arbol =
+    case arbol of
+        Empty ->
+            0
+
+        Node valor Empty Empty ->
+            valor
+
+        Node valor izquierda derecha ->
+            let
+                minIzq = minimo izquierda
+                minDer = minimo derecha
+            in
+            List.minimum [ valor, minIzq, minDer ]
+                |> Maybe.withDefault valor
 ```
 
 **10. Valor Máximo (sin Maybe)**
@@ -163,8 +218,21 @@ Encontrá el valor máximo en un árbol. Si el árbol está vacío, devolvé 0.
 
 ```elm
 maximo : Tree Int -> Int
--- Ejemplo: maximo Empty == 0
--- Ejemplo: maximo arbolPequeno == 5
+maximo arbol =
+    case arbol of
+        Empty ->
+            0
+
+        Node valor Empty Empty ->
+            valor
+
+        Node valor izquierda derecha ->
+            let
+                maxIzq = maximo izquierda
+                maxDer = maximo derecha
+            in
+            List.maximum [ valor, maxIzq, maxDer ]
+                |> Maybe.withDefault valor
 ```
 
 ---
@@ -187,8 +255,21 @@ Buscá un valor en el árbol. Si existe, devolvé `Just valor`, sino `Nothing`.
 
 ```elm
 buscar : a -> Tree a -> Maybe a
--- Ejemplo: buscar 5 arbolPequeno == Just 5
--- Ejemplo: buscar 10 arbolPequeno == Nothing
+buscar valor arbol =
+    case arbol of
+        Empty ->
+            Nothing
+
+        Node x izquierda derecha ->
+            if x == valor then
+                Just x
+            else
+                case buscar valor izquierda of
+                    Just encontrado ->
+                        Just encontrado
+
+                    Nothing ->
+                        buscar valor derecha
 ```
 
 **12. Encontrar Mínimo (con Maybe)**
@@ -197,8 +278,31 @@ Encontrá el valor mínimo. Si el árbol está vacío, devolvé `Nothing`.
 
 ```elm
 encontrarMinimo : Tree comparable -> Maybe comparable
--- Ejemplo: encontrarMinimo Empty == Nothing
--- Ejemplo: encontrarMinimo arbolPequeno == Just 1
+encontrarMinimo arbol =
+    case arbol of
+        Empty ->
+            Nothing
+
+        Node valor Empty Empty ->
+            Just valor
+
+        Node valor izquierda derecha ->
+            let
+                minIzq = encontrarMinimo izquierda
+                minDer = encontrarMinimo derecha
+            in
+            case (minIzq, minDer) of
+                (Nothing, Nothing) ->
+                    Just valor
+
+                (Just a, Nothing) ->
+                    Just (min a valor)
+
+                (Nothing, Just b) ->
+                    Just (min b valor)
+
+                (Just a, Just b) ->
+                    Just (min valor (min a b))
 ```
 
 **13. Encontrar Máximo (con Maybe)**
@@ -207,8 +311,31 @@ Encontrá el valor máximo. Si el árbol está vacío, devolvé `Nothing`.
 
 ```elm
 encontrarMaximo : Tree comparable -> Maybe comparable
--- Ejemplo: encontrarMaximo Empty == Nothing
--- Ejemplo: encontrarMaximo arbolPequeno == Just 5
+encontrarMaximo arbol =
+    case arbol of
+        Empty ->
+            Nothing
+
+        Node valor Empty Empty ->
+            Just valor
+
+        Node valor izquierda derecha ->
+            let
+                maxIzq = encontrarMaximo izquierda
+                maxDer = encontrarMaximo derecha
+            in
+            case (maxIzq, maxDer) of
+                (Nothing, Nothing) ->
+                    Just valor
+
+                (Just a, Nothing) ->
+                    Just (max a valor)
+
+                (Nothing, Just b) ->
+                    Just (max b valor)
+
+                (Just a, Just b) ->
+                    Just (max valor (max a b))
 ```
 
 **14. Buscar Por Predicado**
@@ -217,8 +344,21 @@ Buscá el primer valor que satisfaga un predicado.
 
 ```elm
 buscarPor : (a -> Bool) -> Tree a -> Maybe a
--- Ejemplo: buscarPor (\x -> x > 3) arbolPequeno == Just 5
--- Ejemplo: buscarPor (\x -> x > 10) arbolPequeno == Nothing
+buscarPor predicado arbol =
+    case arbol of
+        Empty ->
+            Nothing
+
+        Node valor izquierda derecha ->
+            if predicado valor then
+                Just valor
+            else
+                case buscarPor predicado izquierda of
+                    Just encontrado ->
+                        Just encontrado
+
+                    Nothing ->
+                        buscarPor predicado derecha
 ```
 
 **15. Obtener Valor de Raíz**
@@ -227,8 +367,13 @@ Obtené el valor de la raíz del árbol.
 
 ```elm
 raiz : Tree a -> Maybe a
--- Ejemplo: raiz Empty == Nothing
--- Ejemplo: raiz (Node 5 Empty Empty) == Just 5
+raiz arbol =
+    case arbol of
+        Empty ->
+            Nothing
+
+        Node valor _ _ ->
+            Just valor
 ```
 
 ### Encadenando Operaciones con andThen
@@ -243,11 +388,22 @@ Escribí funciones para obtener el subárbol izquierdo y derecho.
 
 ```elm
 hijoIzquierdo : Tree a -> Maybe (Tree a)
--- Ejemplo: hijoIzquierdo Empty == Nothing
--- Ejemplo: hijoIzquierdo (Node 5 (Node 3 Empty Empty) Empty) == Just (Node 3 Empty Empty)
+hijoIzquierdo arbol =
+    case arbol of
+        Empty ->
+            Nothing
+
+        Node _ izquierda _ ->
+            Just izquierda
 
 hijoDerecho : Tree a -> Maybe (Tree a)
--- Similar al izquierdo
+hijoDerecho arbol =
+    case arbol of
+        Empty ->
+            Nothing
+
+            Node _ _ derecha ->
+            Just derecha
 ```
 
 **17. Obtener Nieto**
@@ -256,8 +412,9 @@ Usá `andThen` para obtener el hijo izquierdo del hijo izquierdo.
 
 ```elm
 nietoIzquierdoIzquierdo : Tree a -> Maybe (Tree a)
--- Pista: Usá andThen para encadenar hijoIzquierdo dos veces
--- Ejemplo: nietoIzquierdoIzquierdo arbolMediano == Just (Node 3 Empty Empty)
+nietoIzquierdoIzquierdo arbol =
+    hijoIzquierdo arbol
+        |> Maybe.andThen hijoIzquierdo
 ```
 
 **18. Buscar en Profundidad**
@@ -267,12 +424,28 @@ Buscá un valor en el árbol y luego buscá otro valor en el subárbol encontrad
 ```elm
 -- Primero implementá esta función auxiliar:
 obtenerSubarbol : a -> Tree a -> Maybe (Tree a)
--- Retorna el subárbol cuya raíz tiene el valor buscado
+obtenerSubarbol valor arbol =
+    case arbol of
+        Empty ->
+            Nothing
+
+        Node x izquierda derecha ->
+            if x == valor then
+                Just arbol
+            else
+                case obtenerSubarbol valor izquierda of
+                    Just sub ->
+                        Just sub
+
+                    Nothing ->
+                        obtenerSubarbol valor derecha
+
 
 -- Luego úsala para implementar:
 buscarEnSubarbol : a -> a -> Tree a -> Maybe a
--- buscarEnSubarbol valor1 valor2 arbol:
--- Busca valor1, y en ese subárbol busca valor2
+buscarEnSubarbol valor1 valor2 arbol =
+    obtenerSubarbol valor1 arbol
+        |> Maybe.andThen (buscar valor2)
 ```
 
 ---
@@ -295,8 +468,13 @@ Verificá que un árbol no esté vacío. Si está vacío, devolvé un error.
 
 ```elm
 validarNoVacio : Tree a -> Result String (Tree a)
--- Ejemplo: validarNoVacio Empty == Err "El árbol está vacío"
--- Ejemplo: validarNoVacio (Node 5 Empty Empty) == Ok (Node 5 Empty Empty)
+validarNoVacio arbol =
+    case arbol of
+        Empty ->
+            Err "El árbol está vacío"
+
+        _ ->
+            Ok arbol
 ```
 
 **20. Obtener Raíz con Error**
@@ -305,8 +483,13 @@ Obtené la raíz del árbol. Si está vacío, devolvé un mensaje de error.
 
 ```elm
 obtenerRaiz : Tree a -> Result String a
--- Ejemplo: obtenerRaiz Empty == Err "No se puede obtener la raíz de un árbol vacío"
--- Ejemplo: obtenerRaiz (Node 5 Empty Empty) == Ok 5
+obtenerRaiz arbol =
+    case arbol of
+        Empty ->
+            Err "No se puede obtener la raíz de un árbol vacío"
+
+        Node valor _ _ ->
+            Ok valor
 ```
 
 **21. Dividir en Valor Raíz y Subárboles**
@@ -315,10 +498,13 @@ Dividí un árbol en su valor raíz y sus dos subárboles.
 
 ```elm
 dividir : Tree a -> Result String (a, Tree a, Tree a)
--- Retorna una tupla (valor, izquierdo, derecho)
--- Ejemplo: dividir Empty == Err "No se puede dividir un árbol vacío"
--- Ejemplo: dividir (Node 5 (Node 3 Empty Empty) (Node 7 Empty Empty))
---          == Ok (5, Node 3 Empty Empty, Node 7 Empty Empty)
+dividir arbol =
+    case arbol of
+        Empty ->
+            Err "No se puede dividir un árbol vacío"
+
+        Node valor izquierda derecha ->
+            Ok (valor, izquierda, derecha)
 ```
 
 **22. Obtener Mínimo con Error**
@@ -327,8 +513,31 @@ Encontrá el mínimo, pero con un mensaje de error descriptivo si falla.
 
 ```elm
 obtenerMinimo : Tree comparable -> Result String comparable
--- Ejemplo: obtenerMinimo Empty == Err "No hay mínimo en un árbol vacío"
--- Ejemplo: obtenerMinimo arbolPequeno == Ok 1
+obtenerMinimo arbol =
+    case arbol of
+        Empty ->
+            Err "No hay mínimo en un árbol vacío"
+
+        Node valor Empty Empty ->
+            Ok valor
+
+        Node valor izquierda derecha ->
+            let
+                minIzq = obtenerMinimo izquierda
+                minDer = obtenerMinimo derecha
+            in
+            case (minIzq, minDer) of
+                (Err _, Err _) ->
+                    Ok valor
+
+                (Ok a, Err _) ->
+                    Ok (min a valor)
+
+                (Err _, Ok b) ->
+                    Ok (min b valor)
+
+                (Ok a, Ok b) ->
+                    Ok (min valor (min a b)
 ```
 
 ### Árbol Binario de Búsqueda (BST)
@@ -343,10 +552,33 @@ Verificá si un árbol es un BST válido.
 
 ```elm
 esBST : Tree comparable -> Bool
--- Pista: Necesitás verificar que todos los valores a la izquierda sean menores
--- y todos los valores a la derecha sean mayores
--- Ejemplo: esBST (Node 5 (Node 3 Empty Empty) (Node 7 Empty Empty)) == True
--- Ejemplo: esBST (Node 5 (Node 7 Empty Empty) (Node 3 Empty Empty)) == False
+esBST arbol =
+    case arbol of
+        Empty ->
+            True
+
+        Node valor izquierda derecha ->
+            let
+                menorQueTodos =
+                    case encontrarMaximo izquierda of
+                        Just maxIzq ->
+                            maxIzq < valor
+
+                        Nothing ->
+                            True
+
+                mayorQueTodos =
+                    case encontrarMinimo derecha of
+                        Just minDer ->
+                            valor < minDer
+
+                        Nothing ->
+                            True
+            in
+            menorQueTodos
+                && mayorQueTodos
+                && esBST izquierda
+                && esBST derecha
 ```
 
 **24. Insertar en BST**
@@ -355,8 +587,30 @@ Insertá un valor en un BST. Si el valor ya existe, devolvé un error.
 
 ```elm
 insertarBST : comparable -> Tree comparable -> Result String (Tree comparable)
--- Ejemplo: insertarBST 4 arbolPequeno == Ok (Node 3 (Node 1 Empty Empty) (Node 5 (Node 4 Empty Empty) Empty))
--- Ejemplo: insertarBST 3 arbolPequeno == Err "El valor 3 ya existe en el árbol"
+insertarBST valor arbol =
+    case arbol of
+        Empty ->
+            Ok (Node valor Empty Empty)
+
+        Node x izquierda derecha ->
+            if valor == x then
+                Err ("El valor " ++ String.fromInt valor ++ " ya existe en el árbol")
+
+            else if valor < x then
+                case insertarBST valor izquierda of
+                    Ok nuevoIzq ->
+                        Ok (Node x nuevoIzq derecha)
+
+                    Err msg ->
+                        Err msg
+
+            else
+                case insertarBST valor derecha of
+                    Ok nuevoDer ->
+                        Ok (Node x izquierda nuevoDer)
+
+                    Err msg ->
+                        Err msg
 ```
 
 **25. Buscar en BST**
@@ -365,8 +619,20 @@ Buscá un valor en un BST de forma eficiente. Devolvé `Result` con error descri
 
 ```elm
 buscarEnBST : comparable -> Tree comparable -> Result String comparable
--- Ejemplo: buscarEnBST 5 arbolPequeno == Ok 5
--- Ejemplo: buscarEnBST 10 arbolPequeno == Err "El valor 10 no se encuentra en el árbol"
+buscarEnBST valor arbol =
+    case arbol of
+        Empty ->
+            Err ("El valor " ++ String.fromInt valor ++ " no se encuentra en el árbol")
+
+        Node x izquierda derecha ->
+            if valor == x then
+                Ok x
+
+            else if valor < x then
+                buscarEnBST valor izquierda
+
+            else
+                buscarEnBST valor derecha
 ```
 
 **26. Validar BST con Result**
@@ -375,9 +641,35 @@ Verificá si un árbol es un BST válido. Si no lo es, explicá por qué.
 
 ```elm
 validarBST : Tree comparable -> Result String (Tree comparable)
--- Ejemplo: validarBST arbolPequeno == Ok arbolPequeno
--- Ejemplo: validarBST (Node 5 (Node 7 Empty Empty) Empty)
---          == Err "Nodo con valor 7 viola la propiedad BST: debe ser menor que 5"
+validarBST arbol =
+    case arbol of
+        Empty ->
+            Ok Empty
+
+        Node valor izquierda derecha ->
+            case validarBST izquierda of
+                Err msg ->
+                    Err msg
+
+                Ok _ ->
+                    case validarBST derecha of
+                        Err msg ->
+                            Err msg
+
+                        Ok _ ->
+                            case (encontrarMaximo izquierda, encontrarMinimo derecha) of
+                                (Just maxIzq, _) if maxIzq >= valor ->
+                                    Err ("Nodo con valor " ++ String.fromInt maxIzq
+                                         ++ " viola la propiedad BST: debe ser menor que "
+                                         ++ String.fromInt valor)
+
+                                (_, Just minDer) if minDer <= valor ->
+                                    Err ("Nodo con valor " ++ String.fromInt minDer
+                                         ++ " viola la propiedad BST: debe ser mayor que "
+                                         ++ String.fromInt valor)
+
+                                _ ->
+                                    Ok arbol
 ```
 
 ---
@@ -394,8 +686,13 @@ Convertí un `Maybe` a `Result`, proporcionando un mensaje de error.
 
 ```elm
 maybeAResult : String -> Maybe a -> Result String a
--- Ejemplo: maybeAResult "Error personalizado" Nothing == Err "Error personalizado"
--- Ejemplo: maybeAResult "Error" (Just 5) == Ok 5
+maybeAResult mensaje valor =
+    case valor of
+        Nothing ->
+            Err mensaje
+
+        Just x ->
+            Ok x
 ```
 
 **28. Result a Maybe**
@@ -404,8 +701,13 @@ Convertí un `Result` a `Maybe`, descartando el mensaje de error.
 
 ```elm
 resultAMaybe : Result error value -> Maybe value
--- Ejemplo: resultAMaybe (Err "algo") == Nothing
--- Ejemplo: resultAMaybe (Ok 5) == Just 5
+resultAMaybe resultado =
+    case resultado of
+        Err _ ->
+            Nothing
+
+        Ok valor ->
+            Just valor
 ```
 
 ### Pipelines de Transformación
@@ -416,10 +718,18 @@ Buscá un valor en un árbol y luego validá que sea positivo.
 
 ```elm
 buscarPositivo : Int -> Tree Int -> Result String Int
--- Primero busca el valor, luego valida que sea > 0
--- Ejemplo: buscarPositivo 5 arbolPequeno == Ok 5
--- Ejemplo: buscarPositivo (-3) (Node (-3) Empty Empty) == Err "El valor -3 no es positivo"
--- Ejemplo: buscarPositivo 10 arbolPequeno == Err "El valor 10 no se encuentra en el árbol"
+buscarPositivo valor arbol =
+    buscar valor arbol
+        |> maybeAResult ("El valor " ++ String.fromInt valor ++ " no se encuentra en el árbol")
+        |> Result.andThen validarPositivo
+
+
+validarPositivo : Int -> Result String Int
+validarPositivo n =
+    if n > 0 then
+        Ok n
+    else
+        Err ("El valor " ++ String.fromInt n ++ " no es positivo")
 ```
 
 **30. Pipeline de Validaciones**
@@ -428,11 +738,10 @@ Realizá múltiples validaciones en secuencia sobre un árbol.
 
 ```elm
 validarArbol : Tree Int -> Result String (Tree Int)
--- Valida que:
--- 1. No esté vacío
--- 2. Sea un BST válido
--- 3. Todos los valores sean positivos
--- Si alguna validación falla, retorna el error correspondiente
+validarArbol arbol =
+    validarNoVacio arbol
+        |> Result.andThen validarBST
+        |> Result.andThen validarPositivos
 ```
 
 **31. Encadenar Búsquedas**
@@ -441,8 +750,13 @@ Buscá un valor, y si lo encontrás, usá ese valor para buscar en otro árbol.
 
 ```elm
 buscarEnDosArboles : Int -> Tree Int -> Tree Int -> Result String Int
--- Busca 'valor' en arbol1, obtiene el resultado, y busca ese resultado en arbol2
--- Pista: Usa Result.andThen para encadenar las búsquedas
+buscarEnDosArboles valor arbol1 arbol2 =
+    buscar valor arbol1
+        |> maybeAResult ("El valor " ++ String.fromInt valor ++ " no se encuentra en el primer árbol")
+        |> Result.andThen (\encontrado ->
+            buscar encontrado arbol2
+                |> maybeAResult ("El valor " ++ String.fromInt encontrado ++ " no se encuentra en el segundo árbol")
+        )
 ```
 
 ---
@@ -459,7 +773,13 @@ Recorrido: izquierdo → raíz → derecho (en BST da valores ordenados).
 
 ```elm
 inorder : Tree a -> List a
--- Ejemplo: inorder arbolPequeno == [1, 3, 5]
+inorder arbol =
+    case arbol of
+        Empty ->
+            []
+
+        Node valor izquierda derecha ->
+            inorder izquierda ++ [ valor ] ++ inorder derecha
 ```
 
 **33. Recorrido Preorder**
@@ -468,7 +788,13 @@ Recorrido: raíz → izquierdo → derecho.
 
 ```elm
 preorder : Tree a -> List a
--- Ejemplo: preorder arbolPequeno == [3, 1, 5]
+preorder arbol =
+    case arbol of
+        Empty ->
+            []
+
+        Node valor izquierda derecha ->
+            [ valor ] ++ preorder izquierda ++ preorder derecha
 ```
 
 **34. Recorrido Postorder**
@@ -477,7 +803,13 @@ Recorrido: izquierdo → derecho → raíz.
 
 ```elm
 postorder : Tree a -> List a
--- Ejemplo: postorder arbolPequeno == [1, 5, 3]
+postorder arbol =
+    case arbol of
+        Empty ->
+            []
+
+        Node valor izquierda derecha ->
+            postorder izquierda ++ postorder derecha ++ [ valor ]
 ```
 
 ### Transformaciones
@@ -488,8 +820,13 @@ Aplicá una función a todos los valores del árbol.
 
 ```elm
 mapArbol : (a -> b) -> Tree a -> Tree b
--- Ejemplo: mapArbol (\x -> x * 2) arbolPequeno
---          == Node 6 (Node 2 Empty Empty) (Node 10 Empty Empty)
+mapArbol f arbol =
+    case arbol of
+        Empty ->
+            Empty
+
+        Node valor izquierda derecha ->
+            Node (f valor) (mapArbol f izquierda) (mapArbol f derecha)
 ```
 
 **36. Filter sobre Árbol**
@@ -498,8 +835,31 @@ Mantené solo los nodos que satisfagan un predicado. ¡Cuidado! Esto puede rompe
 
 ```elm
 filterArbol : (a -> Bool) -> Tree a -> Tree a
--- Mantén solo los nodos donde el predicado es True
--- Ejemplo: filterArbol (\x -> x > 2) arbolPequeno == Node 3 Empty (Node 5 Empty Empty)
+filterArbol predicado arbol =
+    case arbol of
+        Empty ->
+            Empty
+
+        Node valor izquierda derecha ->
+            let
+                izquierdaFiltrada = filterArbol predicado izquierda
+                derechaFiltrada = filterArbol predicado derecha
+            in
+            if predicado valor then
+                Node valor izquierdaFiltrada derechaFiltrada
+            else
+                -- Si el valor no cumple, unimos los subárboles filtrados
+                combinar izquierdaFiltrada derechaFiltrada
+
+
+combinar : Tree a -> Tree a -> Tree a
+combinar izquierda derecha =
+    case izquierda of
+        Empty ->
+            derecha
+
+        Node valor izq der ->
+            Node valor izq (combinar der derecha)
 ```
 
 **37. Fold sobre Árbol**
@@ -508,8 +868,17 @@ Implementá fold para árboles (similar a List.foldl).
 
 ```elm
 foldArbol : (a -> b -> b) -> b -> Tree a -> b
--- Usa recorrido inorder
--- Ejemplo: foldArbol (+) 0 arbolPequeno == 9
+foldArbol f acumulador arbol =
+    case arbol of
+        Empty ->
+            acumulador
+
+        Node valor izquierda derecha ->
+            let
+                acumuladorIzq = foldArbol f acumulador izquierda
+                acumuladorConValor = f valor acumuladorIzq
+            in
+            foldArbol f acumuladorConValor derecha
 ```
 
 ### BST Avanzado
